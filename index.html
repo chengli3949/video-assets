@@ -2,20 +2,38 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes">
 <title>产品演示视频</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Microsoft YaHei,sans-serif}
-.container{width:100%;max-width:800px;padding:16px}
-video{width:100%;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+body{background:#0d1117;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Microsoft YaHei,sans-serif;padding:12px 0}
+.container{width:100%;max-width:800px;padding:12px 16px}
+video{width:100%;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);background:#000}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{flex:1;min-width:140px;display:block;padding:12px 16px;background:linear-gradient(135deg,#1f5fd1,#4880ed);color:#fff;text-decoration:none;text-align:center;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(31,95,209,.3)}
+.btn.secondary{background:linear-gradient(135deg,#7c5cdb,#8f6cf0);box-shadow:0 4px 12px rgba(124,92,219,.3)}
+.tip{margin-top:14px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:8px;color:rgba(255,255,255,.6);font-size:12px;line-height:1.6;text-align:center}
+.loading{display:none;margin-top:12px;text-align:center;color:rgba(255,255,255,.7);font-size:13px}
 </style>
 </head>
 <body>
 <div class="container">
-<video controls playsinline webkit-playsinline preload="metadata">
+<video id="v" controls playsinline webkit-playsinline preload="none" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'><rect width='16' height='9' fill='%23111'/><polygon points='7,3 7,6 10,4.5' fill='%23fff'/></svg>">
 <source src="demo.mp4" type="video/mp4">
+您的浏览器不支持视频播放，请点击下方按钮下载观看。
 </video>
+<div class="loading" id="loading">视频加载中，请稍候...</div>
+<div class="actions">
+<a class="btn" href="demo.mp4" target="_blank" rel="noopener">在线观看</a>
+<a class="btn secondary" href="demo.mp4" download>下载视频</a>
 </div>
+<p class="tip">如播放卡顿，建议点击「下载视频」保存到本地观看</p>
+</div>
+<script>
+var v=document.getElementById('v'),ld=document.getElementById('loading');
+v.addEventListener('waiting',function(){ld.style.display='block'});
+v.addEventListener('canplay',function(){ld.style.display='none'});
+v.addEventListener('playing',function(){ld.style.display='none'});
+</script>
 </body>
 </html>
