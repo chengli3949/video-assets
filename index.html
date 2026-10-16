@@ -8,8 +8,13 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0d1117;font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Microsoft YaHei,sans-serif;color:#fff;min-height:100vh}
 .container{max-width:800px;margin:0 auto;padding:12px 16px}
-.video-wrap{width:100%;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);background:#000;margin-top:12px}
-.video-wrap video{width:100%;display:block}
+.video-wrap{position:relative;width:100%;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);background:#000;margin-top:12px;aspect-ratio:9/16}
+.video-wrap video{width:100%;height:100%;display:block;object-fit:contain}
+.loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.85);color:#fff;font-size:14px}
+.loading.hide{display:none}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#4880ed;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress{margin-top:8px;color:rgba(255,255,255,.7);font-size:13px}
 .title{margin-top:18px;font-size:16px;font-weight:600;letter-spacing:1px;text-align:center}
 .sub{margin-top:6px;font-size:12px;color:rgba(255,255,255,.5);text-align:center}
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
@@ -17,7 +22,6 @@ body{background:#0d1117;font-family:-apple-system,BlinkMacSystemFont,PingFang SC
 .btn.secondary{background:linear-gradient(135deg,#7c5cdb,#8f6cf0);box-shadow:0 4px 12px rgba(124,92,219,.3)}
 .tip{margin:16px 0 20px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:8px;color:rgba(255,255,255,.6);font-size:12px;line-height:1.6;text-align:center}
 
-/* WeChat 引导浮层 */
 .wechat-mask{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:none;flex-direction:column;align-items:center;padding:40px 24px;text-align:center}
 .wechat-mask.show{display:flex}
 .arrow{position:absolute;top:14px;right:24px;width:60px;height:60px;animation:bounce 1.2s ease-in-out infinite}
@@ -32,7 +36,6 @@ body{background:#0d1117;font-family:-apple-system,BlinkMacSystemFont,PingFang SC
 </head>
 <body>
 
-<!-- 微信引导浮层 -->
 <div class="wechat-mask" id="wxmask">
   <div class="arrow">
     <svg viewBox="0 0 60 60" fill="none"><path d="M10 50 Q20 20 50 15" stroke="#ffd84d" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M42 8 L52 14 L46 24" stroke="#ffd84d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -43,53 +46,90 @@ body{background:#0d1117;font-family:-apple-system,BlinkMacSystemFont,PingFang SC
     选择 <b>在浏览器打开</b><br>
     即可流畅观看演示视频
   </p>
-  <button class="mask-btn" id="wxbtn">一键在浏览器打开</button>
-  <p class="mask-sub">或复制链接后粘贴到 Safari / Chrome 打开</p>
+  <button class="mask-btn" id="wxbtn" onclick="copyLink()">复制链接</button>
+  <p class="mask-sub" id="copied-tip">复制成功后，切到 Safari / Chrome 粘贴打开</p>
 </div>
 
 <div class="container">
   <div class="video-wrap">
-    <video id="v" controls playsinline webkit-playsinline preload="none" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'><rect width='16' height='9' fill='%23111'/><polygon points='7,3 7,6 10,4.5' fill='%23fff'/></svg>">
-      <source src="demo.mp4" type="video/mp4">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div>视频加载中…</div>
+      <div class="progress" id="progress">0%</div>
+    </div>
+    <video id="v" controls playsinline webkit-playsinline preload="none" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'><rect width='9' height='16' fill='%23111'/><polygon points='3.5,6 3.5,10 6.5,8' fill='%23fff'/></svg>">
       您的浏览器不支持视频播放，请下载后观看。
     </video>
   </div>
   <p class="title">AI套件 · 工资管理 产品演示</p>
   <p class="sub">Kingdee AI Suite · Payroll Management</p>
   <div class="actions">
-    <a class="btn" href="demo.mp4" target="_blank" rel="noopener">在线观看</a>
-    <a class="btn secondary" href="demo.mp4" download>下载视频</a>
+    <a class="btn" href="demo.mp4" target="_blank" rel="noopener" download>下载视频</a>
   </div>
-  <p class="tip">如播放卡顿，建议点「下载视频」保存到本地观看</p>
+  <p class="tip">如加载较慢，建议点「下载视频」保存到本地观看</p>
 </div>
 
 <script>
 (function(){
   var ua = navigator.userAgent.toLowerCase();
   var isWx = /micromessenger/.test(ua);
-  var targetUrl = location.href.replace(/\/index\.html.*$/, '/') ;
-  // 浮层按钮：尝试通过 scheme 唤起系统浏览器
-  var btn = document.getElementById('wxbtn');
-  var tryOpen = function(){
-    // iOS Safari
-    var a = document.createElement('a');
-    a.href = targetUrl;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    // 尝试 scheme 跳转（部分机型生效）
-    setTimeout(function(){
-      location.href = 'googlechrome://open-url?url=' + encodeURIComponent(targetUrl);
-    }, 200);
-  };
-  btn.addEventListener('click', function(){
-    tryOpen();
-    btn.textContent = '已尝试唤起浏览器，请切换到弹出窗口';
+  if(isWx) document.getElementById('wxmask').classList.add('show');
+
+  document.getElementById('wxbtn').addEventListener('click', function(){
+    var url = location.href;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){
+        document.getElementById('wxbtn').textContent = '已复制 ✓';
+        document.getElementById('copied-tip').textContent = '请切到 Safari / Chrome 粘贴打开';
+      }).catch(fallbackCopy);
+    } else { fallbackCopy(); }
+    function fallbackCopy(){
+      var ta = document.createElement('textarea');
+      ta.value = url; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); document.getElementById('wxbtn').textContent='已复制 ✓'; }
+      catch(e){ alert('请手动长按链接复制：\n' + url); }
+      document.body.removeChild(ta);
+    }
   });
-  if(isWx){
-    document.getElementById('wxmask').classList.add('show');
-  }
+
+  var video = document.getElementById('v');
+  var loading = document.getElementById('loading');
+  var progress = document.getElementById('progress');
+
+  // 用 fetch 加载成 Blob，绕开 Range 限制
+  fetch('demo.mp4').then(function(resp){
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    var reader = resp.body.getReader();
+    var total = parseInt(resp.headers.get('Content-Length') || '0', 10);
+    var received = 0;
+    var chunks = [];
+    function pump(){
+      return reader.read().then(function(r){
+        if(r.done) return;
+        chunks.push(r.value);
+        received += r.value.length;
+        if(total > 0){
+          progress.textContent = Math.round(received/total*100) + '%';
+        } else {
+          progress.textContent = (received/1024/1024).toFixed(1) + ' MB';
+        }
+        return pump();
+      });
+    }
+    return pump().then(function(){
+      var blob = new Blob(chunks, {type: 'video/mp4'});
+      video.src = URL.createObjectURL(blob);
+      loading.classList.add('hide');
+      video.play().catch(function(){});
+    });
+  }).catch(function(err){
+    // 降级：直接用 src
+    progress.textContent = '加载失败，尝试直接播放…';
+    video.src = 'demo.mp4';
+    video.load();
+    setTimeout(function(){ loading.classList.add('hide'); }, 1500);
+  });
 })();
 </script>
 </body>
