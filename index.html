@@ -3,37 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes">
-<title>产品演示视频</title>
+<title>AI套件·工资管理 产品演示</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Microsoft YaHei,sans-serif;padding:12px 0}
-.container{width:100%;max-width:800px;padding:12px 16px}
-video{width:100%;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);background:#000}
-.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-.btn{flex:1;min-width:140px;display:block;padding:12px 16px;background:linear-gradient(135deg,#1f5fd1,#4880ed);color:#fff;text-decoration:none;text-align:center;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(31,95,209,.3)}
+body{background:#0d1117;font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Microsoft YaHei,sans-serif;color:#fff;min-height:100vh}
+.container{max-width:800px;margin:0 auto;padding:12px 16px}
+.video-wrap{width:100%;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);background:#000;margin-top:12px}
+.video-wrap video{width:100%;display:block}
+.title{margin-top:18px;font-size:16px;font-weight:600;letter-spacing:1px;text-align:center}
+.sub{margin-top:6px;font-size:12px;color:rgba(255,255,255,.5);text-align:center}
+.actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn{flex:1;min-width:140px;display:block;padding:13px 16px;background:linear-gradient(135deg,#1f5fd1,#4880ed);color:#fff;text-decoration:none;text-align:center;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(31,95,209,.3)}
 .btn.secondary{background:linear-gradient(135deg,#7c5cdb,#8f6cf0);box-shadow:0 4px 12px rgba(124,92,219,.3)}
-.tip{margin-top:14px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:8px;color:rgba(255,255,255,.6);font-size:12px;line-height:1.6;text-align:center}
-.loading{display:none;margin-top:12px;text-align:center;color:rgba(255,255,255,.7);font-size:13px}
+.tip{margin:16px 0 20px;padding:10px 14px;background:rgba(255,255,255,.06);border-radius:8px;color:rgba(255,255,255,.6);font-size:12px;line-height:1.6;text-align:center}
+
+/* WeChat 引导浮层 */
+.wechat-mask{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:none;flex-direction:column;align-items:center;padding:40px 24px;text-align:center}
+.wechat-mask.show{display:flex}
+.arrow{position:absolute;top:14px;right:24px;width:60px;height:60px;animation:bounce 1.2s ease-in-out infinite}
+.arrow svg{width:100%;height:100%}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.mask-title{margin-top:90px;font-size:20px;font-weight:700;color:#ffd84d}
+.mask-steps{margin-top:18px;color:rgba(255,255,255,.85);font-size:15px;line-height:2}
+.mask-steps b{color:#ffd84d;font-weight:600}
+.mask-btn{margin-top:28px;padding:14px 32px;background:#ffd84d;color:#0d1117;border:none;border-radius:26px;font-size:16px;font-weight:700;box-shadow:0 6px 20px rgba(255,216,77,.4)}
+.mask-sub{margin-top:16px;font-size:12px;color:rgba(255,255,255,.5)}
 </style>
 </head>
 <body>
+
+<!-- 微信引导浮层 -->
+<div class="wechat-mask" id="wxmask">
+  <div class="arrow">
+    <svg viewBox="0 0 60 60" fill="none"><path d="M10 50 Q20 20 50 15" stroke="#ffd84d" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M42 8 L52 14 L46 24" stroke="#ffd84d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <p class="mask-title">当前为微信内置浏览器</p>
+  <p class="mask-steps">
+    请点右上角 <b>···</b><br>
+    选择 <b>在浏览器打开</b><br>
+    即可流畅观看演示视频
+  </p>
+  <button class="mask-btn" id="wxbtn">一键在浏览器打开</button>
+  <p class="mask-sub">或复制链接后粘贴到 Safari / Chrome 打开</p>
+</div>
+
 <div class="container">
-<video id="v" controls playsinline webkit-playsinline preload="none" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'><rect width='16' height='9' fill='%23111'/><polygon points='7,3 7,6 10,4.5' fill='%23fff'/></svg>">
-<source src="demo.mp4" type="video/mp4">
-您的浏览器不支持视频播放，请点击下方按钮下载观看。
-</video>
-<div class="loading" id="loading">视频加载中，请稍候...</div>
-<div class="actions">
-<a class="btn" href="demo.mp4" target="_blank" rel="noopener">在线观看</a>
-<a class="btn secondary" href="demo.mp4" download>下载视频</a>
+  <div class="video-wrap">
+    <video id="v" controls playsinline webkit-playsinline preload="none" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'><rect width='16' height='9' fill='%23111'/><polygon points='7,3 7,6 10,4.5' fill='%23fff'/></svg>">
+      <source src="demo.mp4" type="video/mp4">
+      您的浏览器不支持视频播放，请下载后观看。
+    </video>
+  </div>
+  <p class="title">AI套件 · 工资管理 产品演示</p>
+  <p class="sub">Kingdee AI Suite · Payroll Management</p>
+  <div class="actions">
+    <a class="btn" href="demo.mp4" target="_blank" rel="noopener">在线观看</a>
+    <a class="btn secondary" href="demo.mp4" download>下载视频</a>
+  </div>
+  <p class="tip">如播放卡顿，建议点「下载视频」保存到本地观看</p>
 </div>
-<p class="tip">如播放卡顿，建议点击「下载视频」保存到本地观看</p>
-</div>
+
 <script>
-var v=document.getElementById('v'),ld=document.getElementById('loading');
-v.addEventListener('waiting',function(){ld.style.display='block'});
-v.addEventListener('canplay',function(){ld.style.display='none'});
-v.addEventListener('playing',function(){ld.style.display='none'});
+(function(){
+  var ua = navigator.userAgent.toLowerCase();
+  var isWx = /micromessenger/.test(ua);
+  var targetUrl = location.href.replace(/\/index\.html.*$/, '/') ;
+  // 浮层按钮：尝试通过 scheme 唤起系统浏览器
+  var btn = document.getElementById('wxbtn');
+  var tryOpen = function(){
+    // iOS Safari
+    var a = document.createElement('a');
+    a.href = targetUrl;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    // 尝试 scheme 跳转（部分机型生效）
+    setTimeout(function(){
+      location.href = 'googlechrome://open-url?url=' + encodeURIComponent(targetUrl);
+    }, 200);
+  };
+  btn.addEventListener('click', function(){
+    tryOpen();
+    btn.textContent = '已尝试唤起浏览器，请切换到弹出窗口';
+  });
+  if(isWx){
+    document.getElementById('wxmask').classList.add('show');
+  }
+})();
 </script>
 </body>
 </html>
